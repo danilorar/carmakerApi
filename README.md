@@ -1,6 +1,4 @@
-# cm-py-tools
-
-Small Python toolkit for running and analyzing CarMaker simulations.
+Short "replica" of Ipg's Test Manager in Python
 
 ## Files
 
