@@ -9,17 +9,19 @@ import subprocess
 import cmapi 
 from cmapi import Project, Runtime, Variation
 from cmConfig import PROJECT_PATH, TESTRUN_PATH, VEHICLE_PATH, SIGNALS, CASES
+from cmHelpers import start_ipgMovie
 
 # ======= User defined parameters =======
 
 # check params with readParams.py
-READ_PARAMS =False
+READ_PARAMS= False
 READ_MODE = "vehicle" # or "testrun"
+USER_PARAMETER = "SuspF.Spring" # when READ_PARAMS 
 
 # parameter change 
 MAX_PARALLEL_CARMAKERS = 3
-RUN_MODE = "cases"  # "sweep" or "cases" or "sequential"
-MOVIE = False
+RUN_MODE = "sequential"  # "sweep" or "cases" or "sequential"
+IPG_MOVIE = True
 
 # set params to sweep
 # cm API
@@ -65,6 +67,13 @@ class DVAExecutionPolicy(cmapi.VariationExecutionPolicyInteractive):
         signal_rows = [] # signal storage
         
         # start simulation
+        
+        # start IPGMovie if enabled
+        if IPG_MOVIE:
+            try:
+                movie = await start_ipgMovie(variation)
+            except Exception as e:
+                print(f"[{run_name}] IPGMovie setup failed: {e}")
         
         wall_start = time.time()
         print(f"Starting simulation for {run_name}")

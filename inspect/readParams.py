@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import cmapi
 from cmapi import Project
 from cmConfig import PROJECT_PATH, TESTRUN_PATH, VEHICLE_PATH
+from cmSimulate import USER_PARAMETER
 
 # read Parameters either using either: 
 # vehicle_parametrization or testrun_parametrization or [more]
@@ -13,7 +14,7 @@ from cmConfig import PROJECT_PATH, TESTRUN_PATH, VEHICLE_PATH
 READ_MODE = "vehicle"
 if len(sys.argv) > 1:
     READ_MODE = sys.argv[1].lower()
-USER_PARAMETER = "SuspF.Spring"
+USER_PARAMETER = USER_PARAMETER
 
 def load_target_parametrization():
     if READ_MODE == "vehicle": 
