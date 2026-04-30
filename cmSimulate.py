@@ -18,7 +18,8 @@ READ_MODE = "vehicle" # or "testrun"
 
 # parameter change 
 MAX_PARALLEL_CARMAKERS = 3
-RUN_MODE = "sweep"  # "sweep" or "cases"
+RUN_MODE = "cases"  # "sweep" or "cases" or "sequential"
+MOVIE = False
 
 # set params to sweep
 # cm API
@@ -139,32 +140,37 @@ async def main():
          subprocess.run([sys.executable, "inspect/readParams.py", READ_MODE],check=True)
          return
     
+    # to allocate pool = 1 when sequential
+    if RUN_MODE == "sequential":
+        max_parallel = 1
+    else:
+        max_parallel = MAX_PARALLEL_CARMAKERS
+    
     # load project, runtime
     Project.load(PROJECT_PATH)
     runtime = Runtime.create_default_runtime()
     
     # create pool for parallel simulation (from cmapi doc)
     pool = cmapi.StaticConfigResourcePoolCarMaker()
-    pool.set_app_nodes([cmapi.AppNode.create(cmapi.get_hostname(), 0, MAX_PARALLEL_CARMAKERS)])
+    pool.set_app_nodes([cmapi.AppNode.create(cmapi.get_hostname(), 0, max_parallel)])
     runtime.set_resourcepool(cmapi.ResourceType.CarMaker, pool)
-    print(f"Configured CM resource pool with max parallel: {MAX_PARALLEL_CARMAKERS}")
+    print(f"Configured CM resource pool with max parallel: {max_parallel}")
     
-    # cases mode 
-    if RUN_MODE == "cases": 
+    # sequential or cases
+    if RUN_MODE in ["sequential", "cases"]:
         for case in CASES: 
             run_name = case["run_name"]
             parameter_changes = case["parameter_changes"]
-            print(f"\nPreparing batch case: {run_name}")
-            print()
             
-            # load testrun, vehicle
+            print(f"\nPreparing {RUN_MODE} case: {run_name}")
+            
             testrun = Project.instance().load_testrun_parametrization(TESTRUN_PATH)
             vehicle = Project.instance().load_vehicle_parametrization(VEHICLE_PATH)
             
             try: 
                 for parameter_name, new_value in parameter_changes.items():
                     modify_veh_param(vehicle, parameter_name, new_value)
-            except ValueError as e: 
+            except ValueError as e:
                 print(e)
                 return
             
@@ -178,7 +184,7 @@ async def main():
             variation.set_execution_policy(DVAExecutionPolicy)
             await runtime.queue_variation(variation)
             
-
+            
     # sweep mode
     elif RUN_MODE == "sweep": 
         for parameter_name, values in SWEEP_PARAMETER.items(): 
