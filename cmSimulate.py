@@ -11,10 +11,12 @@ from cmapi import Project, Runtime, Variation
 from cmConfig import PROJECT_PATH, TESTRUN_PATH, VEHICLE_PATH, SIGNALS, CASES
 from cmHelpers import start_ipgMovie
 
-# ======= User defined parameters =======
+# ===============================
+# === USER DEFINED PARAMETERS ===
+# ===============================
 
 # check params with readParams.py
-READ_PARAMS= False
+READ_PARAMS = False
 READ_MODE = "vehicle" # or "testrun"
 USER_PARAMETER = "SuspF.Spring" # when READ_PARAMS 
 
@@ -24,16 +26,17 @@ RUN_MODE = "sequential"  # "sweep" or "cases" or "sequential"
 IPG_MOVIE = True
 
 # set params to sweep
-# cm API
 SWEEP_PARAMETER = {
    "SuspF.Spring": [
-        [[0.0, 0.0], [0.1, 3000.0], [1.0, 30000.0]], # case 1 
-        [[0.0, 0.0], [0.1, 6000.0], [1.0, 60000.0]], # case 2
-        [[0.0, 0.0], [0.1, 9000.0], [1.0, 90000.0]], # case 3  
+        50000, # case 1 
+        60000, # case 2
+        90000, # case 3  
     ]
 } 
 
-# ======= Helper functions =======
+# ========================
+# === HELPER FUNCTIONS ===
+# ========================
 
 # modify one vehicle parameter
 def modify_veh_param(vehicle, parameter_name, new_value): 
@@ -56,9 +59,11 @@ def save_csv(signal_rows, run_name):
     print(f"Saved to {csv_path}")
     
     
-# ======= Execution policy =======
-#(from cmapi example)
+# ==========================
+# ==== EXECUTION POLICY ====
+# ==========================
 
+#(from cmapi example)
 class DVAExecutionPolicy(cmapi.VariationExecutionPolicyInteractive):
     @classmethod
     async def run_variation(cls, variation):
@@ -140,7 +145,9 @@ class DVAExecutionPolicy(cmapi.VariationExecutionPolicyInteractive):
         # print(f"[{run_name}] ELAPSED = {wall_end - wall_start:.3f} s") # delta time
         
         
-# ======= Main loop =======
+# ============================
+# === MAIN SIMULATION LOOP ===
+# ============================
 
 async def main(): 
     
