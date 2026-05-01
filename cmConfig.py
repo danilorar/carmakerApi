@@ -37,22 +37,28 @@ SIGNALS = [
 
 # if RUN_MODE is set to "cases" or "sequential"
 CASES = [
+    {
+        "run_name": "corner_base",
+        "parameter_changes": {
+             # no changes  
+        }
+    },
      {
-        "run_name": "acc_soft",
+        "run_name": "corner_soft",
         "parameter_changes": {
             "SuspF.Spring": 20000,
             "SuspR.Spring": 40000
         }
     },
     {
-        "run_name": "acc_medium",
+        "run_name": "corner_medium",
         "parameter_changes": {
             "SuspR.Spring": 80000,
             "SuspF.Spring": 90000   
         }
     },
     {
-        "run_name": "acc_hard",
+        "run_name": "corner_hard",
         "parameter_changes": {
             "SuspF.Spring": 100000,
             "SuspR.Spring": 130000

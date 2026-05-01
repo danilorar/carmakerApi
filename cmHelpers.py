@@ -1,3 +1,6 @@
+import csv
+import math
+
 import cmapi
 from pathlib import Path
 import tkinter as tk
@@ -49,3 +52,30 @@ async def start_ipgMovie(variation):
     print(f"[{run_name}] IPGMovie started")
 
     return movie
+
+def read_csv(filename):
+    with open(filename, newline="") as f:
+        reader = csv.reader(f)
+        header = next(reader)
+        rows = list(reader)
+
+    data = {name: [] for name in header}
+    for row in rows:
+        for i, name in enumerate(header):
+            data[name].append(float(row[i]))
+
+    return data
+
+def integrate(omega, time):
+    angle = [0.0]
+
+    for i in range(1, len(omega)):
+        dt = time[i] - time[i - 1]
+        avg_omega = 0.5 * (omega[i] + omega[i - 1])
+        angle.append(angle[-1] + avg_omega * dt)
+
+    return angle
+
+
+def rad_to_deg(values):
+    return [math.degrees(v) for v in values]

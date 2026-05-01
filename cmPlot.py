@@ -1,32 +1,23 @@
 import csv
 import matplotlib.pyplot as plt
+from cmHelpers import rad_to_deg, read_csv, integrate
 
 LOG_PATH = "/home/danilo/Desktop/cth/vd-control/cm-vd/cmpython/logs/"
+MANEUVERS = "corner"
 
 CSV_FILES = [
-    f"{LOG_PATH}/acc_soft.csv",
-    f"{LOG_PATH}/acc_medium.csv",
-    f"{LOG_PATH}/acc_hard.csv"
+    f"{LOG_PATH}/{MANEUVERS}_base.csv",
+    f"{LOG_PATH}/{MANEUVERS}_soft.csv",
+    f"{LOG_PATH}/{MANEUVERS}_medium.csv",
+    f"{LOG_PATH}/{MANEUVERS}_hard.csv"
 ]
 
 CSV_LABELS = [
+    "Base",
     "Soft",
     "Medium",
     "Hard"
 ]
-
-def read_csv(filename):
-    with open(filename, newline="") as f:
-        reader = csv.reader(f)
-        header = next(reader)
-        rows = list(reader)
-
-    data = {name: [] for name in header}
-    for row in rows:
-        for i, name in enumerate(header):
-            data[name].append(float(row[i]))
-
-    return data
 
 all_data = [read_csv(filename) for filename in CSV_FILES]
 
@@ -142,7 +133,37 @@ ax.legend()
 
 plt.tight_layout()
 
+# =================================
+# === Figure 5: IMU Euler Angles ===
+# =================================
+
+fig, axes = plt.subplots(3, 1, sharex=True, figsize=(10, 9))
+plt.suptitle("Estimated Euler Angles from Gyro Integration")
+
+for data, label in zip(all_data, CSV_LABELS):
+    time = data["Time [s]"]
+
+    roll = (integrate(data["IMU wx [rad/s]"], time)) # deg 
+    pitch = (integrate(data["IMU wy [rad/s]"], time))
+    yaw = (integrate(data["IMU wz [rad/s]"], time))
+
+    axes[0].plot(time, roll, label=label)
+    axes[1].plot(time, pitch, label=label)
+    axes[2].plot(time, yaw, label=label)
+
+axes[0].set_ylabel("Roll [deg]")
+axes[1].set_ylabel("Pitch [deg]")
+axes[2].set_ylabel("Yaw [deg]")
+axes[2].set_xlabel("Time [s]")
+
+for ax in axes:
+    ax.grid(True)
+    ax.legend()
+
+plt.tight_layout()
+
 plt.show()
+
 
 if __name__ == "__main__":
     pass
