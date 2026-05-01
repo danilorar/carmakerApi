@@ -156,7 +156,6 @@ class DVAExecutionPolicy(cmapi.VariationExecutionPolicyInteractive):
         wall_end = time.time()
         # print(f"[{run_name}] ELAPSED = {wall_end - wall_start:.3f} s") # delta time
         
-        
 # ============================
 # === MAIN SIMULATION LOOP ===
 # ============================
