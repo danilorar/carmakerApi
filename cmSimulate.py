@@ -18,11 +18,11 @@ from cmHelpers import start_ipgMovie
 # check params with readParams.py
 READ_PARAMS = False
 READ_MODE = "vehicle" # or "testrun"
-USER_PARAMETER = "SuspF.Spring" # when READ_PARAMS 
+USER_PARAMETER = "SuspR.Spring" # when READ_PARAMS 
 
 # parameter change 
 MAX_PARALLEL_CARMAKERS = 3
-RUN_MODE = "sequential"  # "sweep" or "cases" or "sequential"
+RUN_MODE = "cases"  # "sweep" or "cases" or "sequential"
 IPG_MOVIE = True
 
 # set params to sweep
@@ -84,60 +84,72 @@ class DVAExecutionPolicy(cmapi.VariationExecutionPolicyInteractive):
         print(f"Starting simulation for {run_name}")
         await simcontrol.start_sim()
         
+        MAX_LOG_WALL_TIME = 60.0  # seconds
+        
         started_logging = False
         
         # detects when simulations is stopped or reset
         last_time = None
-        frozen_count = 0
+        frozen_count = 0   
         
-    
+        # Reading all signals in one call is much faster than reading each signal separately
+        signal_names = [name for name, _, _ in SIGNALS]
+        converters = [convert for _, _, convert in SIGNALS]
+        time_index = signal_names.index("Time") 
+        
         # main loop
-        while True: 
-            # read time
-            current_time, = await simcontrol.simio.dva_read_async("Time")
+        while True:
+            # read all signals in one DVA call
+            raw_values = await simcontrol.simio.dva_read_async(*signal_names)
 
-            # wait until sim really starts
-            if not started_logging: 
-                if current_time > 0.0: 
+            row = [
+                convert(value)
+                for value, convert in zip(raw_values, converters)
+            ]
+
+            current_time = row[time_index]
+
+            # wait until sim really starts i.e ignore samples before simulation time starts
+            if not started_logging:
+                if current_time > 0.0:
                     started_logging = True
-                else: 
-                    await asyncio.sleep(0.05)
+                else:
+                    await asyncio.sleep(0.001)
                     continue
-                
-            # read SIGNALS 
-            row = []
-            for name, label, convert in SIGNALS:
-                raw_value, = await simcontrol.simio.dva_read_async(name)
-                row.append(convert(raw_value)) # append to list converted signal
-                
-            signal_rows.append(row) # save in row list and print
-            # print(
-            #     " | ".join(
-            #         f"{SIGNALS[k][1]}: {row[k]:.3f}"
-            #         for k in range(len(SIGNALS))
-            #     )
-            # )
-            
-            # end conditions:
-            # 1. time reset backwards 2. time stopped advancing for too long
+
+            signal_rows.append(row)
+     
+            # Stop logging when simulation time resets or stops advancing.
             if last_time is not None:
                 if current_time < last_time:
                     print("Detected time reset. Ending log.")
                     break
 
-                if abs(current_time - last_time) < 1e-9:
+                if abs(current_time - last_time) < 1e-6:
                     frozen_count += 1
                 else:
                     frozen_count = 0
 
             last_time = current_time
 
-            if frozen_count > 20:
+            if frozen_count > 5:
                 print("Simulation time stopped advancing. Ending log.")
                 break
-
-            await asyncio.sleep(0.01)
-        
+            
+        await asyncio.sleep(0.001)
+               
+        # checks on logging rate and duration        
+        if len(signal_rows) > 1:
+            t0 = signal_rows[0][0]
+            t1 = signal_rows[-1][0]
+            
+            duration = t1 - t0
+            fs = (len(signal_rows) - 1) / duration if duration > 0 else 0.0
+            
+            print(f"[{run_name}] samples: {len(signal_rows)}")
+            print(f"[{run_name}] duration: {duration:.3f} s")
+            print(f"[{run_name}] estimated logging rate: {fs:.2f} Hz")
+                
         # save in csv 
         save_csv(signal_rows, run_name)
 

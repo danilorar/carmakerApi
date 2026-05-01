@@ -1,18 +1,20 @@
 import csv
 import matplotlib.pyplot as plt
 
-# Log Folder: /home/danilo/Desktop/cth/vd-control/cm-vd/cmpython/logs
+LOG_PATH = "/home/danilo/Desktop/cth/vd-control/cm-vd/cmpython/logs"
 
 CSV_FILES = [
-    "/home/danilo/Desktop/cth/vd-control/cm-vd/cmpython/logs/SuspF_Spring_case_1.csv",
-    "/home/danilo/Desktop/cth/vd-control/cm-vd/cmpython/logs/SuspF_Spring_case_2.csv",
-    "/home/danilo/Desktop/cth/vd-control/cm-vd/cmpython/logs/SuspF_Spring_case_3.csv"
+    f"{LOG_PATH}/acc_base.csv",
+    # f"{LOG_PATH}/acc_soft.csv",
+    # f"{LOG_PATH}/acc_medium.csv",
+    # f"{LOG_PATH}/acc_hard.csv"
 ]
 
 CSV_LABELS = [
-    "Baseline",
-    "Modified",
-    "Extra",
+    "Base",
+    "Soft",
+    "Medium",
+    "Hard"
 ]
 
 def read_csv(filename):
@@ -30,7 +32,13 @@ def read_csv(filename):
 
 all_data = [read_csv(filename) for filename in CSV_FILES]
 
+
+# ==================================
+# === Figure 1: Car v, Delta, ax ===
+# ==================================
+
 fig, axes = plt.subplots(3, 1, sharex=True, figsize=(10, 9))
+plt.suptitle("Car Speed, Steering, Acceleration")
 
 # Speed
 for data, label in zip(all_data, CSV_LABELS):
@@ -46,13 +54,52 @@ axes[1].set_ylabel("Steer [deg]")
 axes[1].grid(True)
 axes[1].legend()
 
-# ay
+# ax
 for data, label in zip(all_data, CSV_LABELS):
-    axes[2].plot(data["Time [s]"], data["ay [m/s²]"], label=label)
-axes[2].set_ylabel("ay [m/s²]")
+    axes[2].plot(data["Time [s]"], data["Car ax [m/s²]"], label=label)
+axes[2].set_ylabel("ax [m/s²]")
 axes[2].set_xlabel("Time [s]")
 axes[2].grid(True)
 axes[2].legend()
 
 plt.tight_layout()
+
+
+# ================================
+# === Figure 2: IMU ax, ay, az ===
+# ================================
+
+fig, axes = plt.subplots(3, 1, sharex=True, figsize=(10, 9))
+plt.suptitle("IMU Accelerations")
+
+# ax
+for data, label in zip(all_data, CSV_LABELS):
+    axes[0].plot(data["Time [s]"], data["IMU ax [m/s²]"], label=label)
+axes[0].set_ylabel(" IMU ax [m/s²]")
+axes[0].grid(True)
+axes[0].legend()
+
+# ay
+for data, label in zip(all_data, CSV_LABELS):
+    axes[1].plot(data["Time [s]"], data["IMU ay [m/s²]"], label=label)
+axes[1].set_ylabel(" IMU ay [m/s²]")
+axes[1].grid(True)
+axes[1].legend()
+
+# az
+for data, label in zip(all_data, CSV_LABELS):
+    axes[2].plot(data["Time [s]"], data["IMU az [m/s²]"], label=label)
+axes[2].set_ylabel(" IMU az [m/s²]")
+axes[2].set_xlabel("Time [s]")
+axes[2].grid(True)
+axes[2].legend()
+
+plt.tight_layout()
+
+
+# ================================
+# === Figure 3: IMU wx, wy, wz ===
+# ================================
+
+# TBD 
 plt.show()

@@ -2,8 +2,8 @@ import math
 from pathlib import Path
 
 PROJECT_PATH = Path("/home/danilo/Desktop/cth/vd-control/cm-vd")
-TESTRUN_PATH = Path("/home/danilo/Desktop/cth/vd-control/cm-vd/Data/TestRun/acceleration")    
-VEHICLE_PATH = Path("/home/danilo/Desktop/cth/vd-control/cm-vd/Data/Vehicle/PolestarPy")
+TESTRUN_PATH = Path(f"{PROJECT_PATH}/Data/TestRun/acceleration")
+VEHICLE_PATH = Path(f"{PROJECT_PATH}/Data/Vehicle/PolestarPy")
 
 # cm-signal, label, conversion function (hover in IPGControl to see signal names)
 SIGNALS = [
@@ -38,26 +38,28 @@ SIGNALS = [
 # if RUN_MODE is set to "cases" or "sequential"
 CASES = [
     {
-        "run_name": "baseline",
+        "run_name": "acc_base",
         "parameter_changes": {}
     },
     {
-        "run_name": "front_spring_5000",
+        "run_name": "acc_soft",
         "parameter_changes": {
-            "SuspF.Spring": 50000
-        }
-    },
-    {
-        "run_name": "rear_spring_6000",
-        "parameter_changes": {
+            "SuspF.Spring": 40000,
             "SuspR.Spring": 60000
         }
     },
     {
-        "run_name": "front_rear_combo",
+        "run_name": "acc_medium",
         "parameter_changes": {
-            "SuspF.Spring": 50000,
-            "SuspR.Spring": 100000
+            "SuspR.Spring": 80000,
+            "SuspF.Spring": 90000   
         }
+    },
+    {
+        "run_name": "acc_hard",
+        "parameter_changes": {
+            "SuspF.Spring": 90000,
+            "SuspR.Spring": 110000
         }
+    }
 ]
