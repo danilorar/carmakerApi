@@ -18,12 +18,12 @@ from cmHelpers import start_ipgMovie
 # check params with readParams.py
 READ_PARAMS = False
 READ_MODE = "vehicle" # or "testrun"
-USER_PARAMETER = "SuspR.Spring" # when READ_PARAMS 
+USER_PARAMETER = "SuspF.Damp_Push" # when READ_PARAMS 
 
 # parameter change 
 MAX_PARALLEL_CARMAKERS = 3
 RUN_MODE = "cases"  # "sweep" or "cases" or "sequential"
-IPG_MOVIE = True
+IPG_MOVIE = False
 
 # set params to sweep
 SWEEP_PARAMETER = {

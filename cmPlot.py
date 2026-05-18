@@ -1,19 +1,20 @@
+# List of signals to plot must match the order in cmConfig.py
 import csv
 import matplotlib.pyplot as plt
 from cmHelpers import rad_to_deg, read_csv, integrate
 
 LOG_PATH = "/home/danilo/Desktop/cth/vd-control/cm-vd/cmpython/logs/"
-MANEUVERS = "corner"
+MANEUVERS = "cornering"
 
 CSV_FILES = [
-    f"{LOG_PATH}/{MANEUVERS}_base.csv",
+    # f"{LOG_PATH}/{MANEUVERS}_base.csv",
     f"{LOG_PATH}/{MANEUVERS}_soft.csv",
     f"{LOG_PATH}/{MANEUVERS}_medium.csv",
     f"{LOG_PATH}/{MANEUVERS}_hard.csv"
 ]
 
 CSV_LABELS = [
-    "Base",
+    #"Base",
     "Soft",
     "Medium",
     "Hard"
@@ -133,9 +134,9 @@ ax.legend()
 
 plt.tight_layout()
 
-# =================================
+# ==================================
 # === Figure 5: IMU Euler Angles ===
-# =================================
+# ==================================
 
 fig, axes = plt.subplots(3, 1, sharex=True, figsize=(10, 9))
 plt.suptitle("Estimated Euler Angles from Gyro Integration")
@@ -143,9 +144,9 @@ plt.suptitle("Estimated Euler Angles from Gyro Integration")
 for data, label in zip(all_data, CSV_LABELS):
     time = data["Time [s]"]
 
-    roll = (integrate(data["IMU wx [rad/s]"], time)) # deg 
-    pitch = (integrate(data["IMU wy [rad/s]"], time))
-    yaw = (integrate(data["IMU wz [rad/s]"], time))
+    roll = rad_to_deg(integrate(data["IMU wx [rad/s]"], time)) # deg 
+    pitch = rad_to_deg(integrate(data["IMU wy [rad/s]"], time))
+    yaw = rad_to_deg(integrate(data["IMU wz [rad/s]"], time))
 
     axes[0].plot(time, roll, label=label)
     axes[1].plot(time, pitch, label=label)
@@ -162,8 +163,38 @@ for ax in axes:
 
 plt.tight_layout()
 
-plt.show()
+# ====================================
+# === Figure 6: User Defined Plots ===
+# ====================================
 
+fig, axes = plt.subplots(3, 1, sharex=True, figsize=(10, 9))
+plt.suptitle("User Defined Plots")
+
+# speed
+for data, label in zip(all_data, CSV_LABELS):
+    axes[0].plot(data["Time [s]"], data["Speed [km/h]"], label=label)
+axes[0].set_ylabel("Speed [km/h]")
+axes[0].grid(True)
+axes[0].legend()
+
+# acc
+for data, label in zip(all_data, CSV_LABELS):
+    axes[1].plot(data["Time [s]"], data["IMU ay [m/s²]"], label=label)
+axes[1].set_ylabel("IMU ay [m/s²]")
+axes[1].grid(True)
+axes[1].legend()
+
+# wy (pitch)
+for data, label in zip(all_data, CSV_LABELS):
+    axes[2].plot(data["Time [s]"], data["IMU wy [rad/s]"], label=label)
+axes[2].set_ylabel("IMU wy [rad/s]")
+axes[2].set_xlabel("Time [s]")
+axes[2].grid(True)
+axes[2].legend()
+
+plt.tight_layout()
+
+plt.show()
 
 if __name__ == "__main__":
     pass
